@@ -1,0 +1,6 @@
+crewai[tools,agentops]
+tavily-python
+scrapegraph-py
+python-dotenv
+openai
+litellm
