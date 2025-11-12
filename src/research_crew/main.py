@@ -1,15 +1,20 @@
 import os
+import sys
+from pathlib import Path
 from dotenv import load_dotenv
 from crewai import LLM
-from crewai.knowledge.source.string_knowledge_source import StringKnowledgeSource
 import agentops
 from tavily import TavilyClient
 from scrapegraph_py import Client
 
-from agents import create_agents_and_tasks
-from crew import create_crew
+# Add the parent directory to sys.path to import schemas
+sys.path.append(str(Path(__file__).parent.parent.parent))
+from schemas import SuggestedSearchQueries, AllSearchResults, AllExtractedProducts
 
-def main():
+from .crew import ResearchCrew
+
+def run():
+    """Run the research crew."""
     # Load environment variables from .env file
     load_dotenv()
     
@@ -48,7 +53,7 @@ def main():
     output_dir = "./ai-agent-output"
     os.makedirs(output_dir, exist_ok=True)
 
-    # Initialize models and clients - Updated for OpenRouter with LiteLLM
+    # Initialize models and clients
     basic_llm = LLM(
         model="openrouter/meta-llama/llama-3.3-70b-instruct:free",
         temperature=0,
@@ -57,19 +62,9 @@ def main():
     search_client = TavilyClient(api_key=TAVILY_API_KEY)
     scrape_client = Client(api_key=SCRAPEGRAPH_API_KEY)
 
-    # Company context - Simplified approach
-    about_company = "Hope is a company that provides AI solutions to help websites refine their search and recommendation systems."
+    # Initialize the research crew
+    research_crew = ResearchCrew(search_client, scrape_client, output_dir)
     
-    # Create agents and tasks
-    agents_and_tasks = create_agents_and_tasks(basic_llm, output_dir, search_client, scrape_client)
-
-    # Create the crew
-    hope_crew = create_crew(
-        agents=agents_and_tasks["agents"],
-        tasks=agents_and_tasks["tasks"],
-        company_context=about_company
-    )
-
     # Define inputs for the crew
     inputs = {
         "product_name": "coffee machine for the office",
@@ -82,11 +77,11 @@ def main():
     }
 
     # Run the crew
-    print("Kicking off the crew...")
+    print("Kicking off the research crew...")
     try:
-        crew_results = hope_crew.kickoff(inputs=inputs)
+        result = research_crew.crew().kickoff(inputs=inputs)
         print("Crew run finished.")
-        print("Results:", crew_results)
+        print("Results:", result)
         
         # End AgentOps session
         agentops.end_session("Success")
@@ -98,4 +93,4 @@ def main():
             pass
 
 if __name__ == "__main__":
-    main()
+    run()

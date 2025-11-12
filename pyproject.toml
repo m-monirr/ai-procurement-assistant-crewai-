@@ -1,0 +1,28 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "research-crew"
+version = "0.1.0"
+description = "AI-Powered Procurement Assistant using CrewAI"
+authors = ["Hope Team <contact@hope.ai>"]
+readme = "README.md"
+packages = [{include = "research_crew", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+crewai = {extras = ["tools", "agentops"], version = "^0.70.1"}
+tavily-python = "^0.3.3"
+scrapegraph-py = "^1.0.0"
+python-dotenv = "^1.0.0"
+openai = "^1.0.0"
+litellm = "^1.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.0"
+black = "^23.0"
+flake8 = "^6.0"
+
+[tool.poetry.scripts]
+research-crew = "research_crew.main:run"
