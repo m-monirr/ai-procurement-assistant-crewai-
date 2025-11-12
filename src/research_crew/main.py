@@ -7,9 +7,17 @@ import agentops
 from tavily import TavilyClient
 from scrapegraph_py import Client
 
-# Add the parent directory to sys.path to import schemas
-sys.path.append(str(Path(__file__).parent.parent.parent))
-from schemas import SuggestedSearchQueries, AllSearchResults, AllExtractedProducts
+# Add the root directory to sys.path to import schemas
+root_dir = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(root_dir))
+
+try:
+    from schemas import SuggestedSearchQueries, AllSearchResults, AllExtractedProducts
+except ImportError as e:
+    print(f"Error importing schemas: {e}")
+    print(f"Current working directory: {os.getcwd()}")
+    print(f"Root directory: {root_dir}")
+    sys.exit(1)
 
 from .crew import ResearchCrew
 
@@ -41,6 +49,7 @@ def run():
     
     # Set OpenAI API key for knowledge storage (use OpenRouter key)
     os.environ["OPENAI_API_KEY"] = OPENROUTER_API_KEY
+    os.environ["OPENAI_BASE_URL"] = "https://openrouter.ai/api/v1"
     # ---
 
     try:
@@ -49,21 +58,22 @@ def run():
     except Exception as e:
         print(f"AgentOps initialization warning (non-critical): {str(e)}")
 
-    # Create output directory
-    output_dir = "./ai-agent-output"
+    # Create output directory (use absolute path)
+    output_dir = os.path.join(str(root_dir), "ai-agent-output")
     os.makedirs(output_dir, exist_ok=True)
 
-    # Initialize models and clients
+    # Initialize models and clients - Updated for OpenRouter with LiteLLM
     basic_llm = LLM(
         model="openrouter/meta-llama/llama-3.3-70b-instruct:free",
         temperature=0,
-        api_key=OPENROUTER_API_KEY
+        api_key=OPENROUTER_API_KEY,
+        base_url="https://openrouter.ai/api/v1"
     )
     search_client = TavilyClient(api_key=TAVILY_API_KEY)
     scrape_client = Client(api_key=SCRAPEGRAPH_API_KEY)
 
     # Initialize the research crew
-    research_crew = ResearchCrew(search_client, scrape_client, output_dir)
+    research_crew = ResearchCrew(search_client, scrape_client, output_dir, basic_llm)
     
     # Define inputs for the crew
     inputs = {

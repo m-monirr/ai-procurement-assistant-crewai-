@@ -1,10 +1,15 @@
 import os
+import sys
+from pathlib import Path
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
-from crewai_tools import SerperDevTool
 
+# Add root directory to path for schemas import
+root_dir = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(root_dir))
+
+from schemas import SuggestedSearchQueries, AllSearchResults, AllExtractedProducts, SingleExtractedProduct
 from .tools.custom_tool import SearchTool, ScrapingTool
-from ..schemas import SuggestedSearchQueries, AllSearchResults, AllExtractedProducts, SingleExtractedProduct
 
 @CrewBase
 class ResearchCrew():
@@ -13,17 +18,24 @@ class ResearchCrew():
     agents_config = 'config/agents.yaml'
     tasks_config = 'config/tasks.yaml'
     
-    def __init__(self, search_client, scrape_client, output_dir):
-        self.search_client = search_client
-        self.scrape_client = scrape_client  
-        self.output_dir = output_dir
-        self.search_tool = SearchTool(search_client)
-        self.scraping_tool = ScrapingTool(scrape_client, SingleExtractedProduct.schema_json())
+    def __init__(self, search_client, scrape_client, output_dir, llm):
+        # Store clients and output directory
+        self._search_client = search_client
+        self._scrape_client = scrape_client  
+        self._output_dir = output_dir
+        
+        # Initialize tools
+        self._search_tool = SearchTool(search_client)
+        self._scraping_tool = ScrapingTool(scrape_client, SingleExtractedProduct.schema_json())
+
+        # Store the LLM for agents
+        self._llm = llm
 
     @agent
     def search_queries_recommendation_agent(self) -> Agent:
         return Agent(
             config=self.agents_config['search_queries_recommendation_agent'],
+            llm=self._llm,
             verbose=True,
         )
     
@@ -31,7 +43,8 @@ class ResearchCrew():
     def search_engine_agent(self) -> Agent:
         return Agent(
             config=self.agents_config['search_engine_agent'],
-            tools=[self.search_tool],
+            llm=self._llm,
+            tools=[self._search_tool],
             verbose=True,
         )
     
@@ -39,7 +52,8 @@ class ResearchCrew():
     def scraping_agent(self) -> Agent:
         return Agent(
             config=self.agents_config['scraping_agent'],
-            tools=[self.scraping_tool],
+            llm=self._llm,
+            tools=[self._scraping_tool],
             verbose=True,
         )
     
@@ -47,6 +61,7 @@ class ResearchCrew():
     def procurement_report_author_agent(self) -> Agent:
         return Agent(
             config=self.agents_config['procurement_report_author_agent'],
+            llm=self._llm,
             verbose=True,
         )
 
@@ -55,8 +70,7 @@ class ResearchCrew():
         return Task(
             config=self.tasks_config['search_queries_recommendation_task'],
             agent=self.search_queries_recommendation_agent(),
-            output_json=SuggestedSearchQueries,
-            output_file=os.path.join(self.output_dir, "step_1_suggested_search_queries.json"),
+            output_file=os.path.join(self._output_dir, "step_1_suggested_search_queries.json"),
         )
 
     @task
@@ -64,8 +78,7 @@ class ResearchCrew():
         return Task(
             config=self.tasks_config['search_engine_task'],
             agent=self.search_engine_agent(),
-            output_json=AllSearchResults,
-            output_file=os.path.join(self.output_dir, "step_2_search_results.json"),
+            output_file=os.path.join(self._output_dir, "step_2_search_results.json"),
         )
 
     @task
@@ -73,8 +86,7 @@ class ResearchCrew():
         return Task(
             config=self.tasks_config['scraping_task'],
             agent=self.scraping_agent(),
-            output_json=AllExtractedProducts,
-            output_file=os.path.join(self.output_dir, "step_3_search_results.json"),
+            output_file=os.path.join(self._output_dir, "step_3_search_results.json"),
         )
 
     @task
@@ -82,7 +94,7 @@ class ResearchCrew():
         return Task(
             config=self.tasks_config['procurement_report_author_task'],
             agent=self.procurement_report_author_agent(),
-            output_file=os.path.join(self.output_dir, "step_4_procurement_report.html"),
+            output_file=os.path.join(self._output_dir, "step_4_procurement_report.html"),
         )
 
     @crew

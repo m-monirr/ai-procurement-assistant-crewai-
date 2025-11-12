@@ -11,7 +11,6 @@ search_queries_recommendation_task:
   expected_output: >
     A JSON object containing a list of suggested search queries.
   agent: search_queries_recommendation_agent
-  output_json: SuggestedSearchQueries
   output_file: "step_1_suggested_search_queries.json"
 
 search_engine_task:
@@ -24,7 +23,6 @@ search_engine_task:
   expected_output: >
     A JSON object containing the search results.
   agent: search_engine_agent
-  output_json: AllSearchResults
   output_file: "step_2_search_results.json"
 
 scraping_task:
@@ -35,7 +33,6 @@ scraping_task:
   expected_output: >
     A JSON object containing products details
   agent: scraping_agent
-  output_json: AllExtractedProducts
   output_file: "step_3_search_results.json"
 
 procurement_report_author_task:
