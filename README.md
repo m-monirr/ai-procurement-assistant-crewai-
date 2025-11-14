@@ -183,5 +183,3 @@ Hope is a company that provides AI solutions to help websites refine their searc
 
 ---
 
-**Built with ❤️ using CrewAI and Llama 3.3 70B**
-
