@@ -5,6 +5,7 @@ An intelligent multi-agent system built with CrewAI that automates product resea
 ## 🌟 Features
 
 - **Multi-Agent Architecture**: 4 specialized AI agents working together
+- **YAML Configuration**: Clean agent and task definitions using YAML
 - **Smart Search**: AI-generated search queries for optimal product discovery
 - **Web Scraping**: Automated extraction of product details and pricing
 - **Comprehensive Reports**: Professional HTML reports with Bootstrap UI
@@ -19,9 +20,28 @@ An intelligent multi-agent system built with CrewAI that automates product resea
 3. **Web Scraping Agent**: Extracts detailed product information
 4. **Procurement Report Author**: Creates professional HTML reports
 
-### Workflow
+### Project Structure
 ```
-Search Queries → Product Search → Data Extraction → Report Generation
+research_crew/
+├── .gitignore
+├── pyproject.toml
+├── README.md
+├── .env.example
+├── .env
+├── run.py
+├── schemas.py
+├── ai-agent-output/
+└── src/
+    └── research_crew/
+        ├── __init__.py
+        ├── main.py
+        ├── crew.py
+        ├── tools/
+        │   ├── custom_tool.py
+        │   └── __init__.py
+        └── config/
+            ├── agents.yaml
+            └── tasks.yaml
 ```
 
 ## 🚀 Getting Started
@@ -46,6 +66,8 @@ cd ai-procurement-assistant
 2. **Install dependencies**
 ```bash
 pip install -r requirements.txt
+# or with poetry
+poetry install
 ```
 
 3. **Configure API Keys**
@@ -57,17 +79,17 @@ pip install -r requirements.txt
    
    Then edit `.env` and add your actual API keys:
    ```env
-   OPENROUTER_API_KEY=sk-or-v1-your_actual_key_here
-   AGENTOPS_API_KEY=your_actual_agentops_key
-   TAVILY_API_KEY=tvly-dev-your_actual_tavily_key
-   SCRAPEGRAPH_API_KEY=sgai-your_actual_scrapegraph_key
+   OPENROUTER_API_KEY=your_openrouter_key_here
+   AGENTOPS_API_KEY=your_agentops_key_here
+   TAVILY_API_KEY=your_tavily_key_here
+   SCRAPEGRAPH_API_KEY=your_scrapegraph_key_here
    ```
 
 ### Usage
 
 Run the procurement analysis:
 ```bash
-python main.py
+python run.py
 ```
 
 The system will:
@@ -75,24 +97,6 @@ The system will:
 2. Search across Egyptian e-commerce sites
 3. Extract detailed product information
 4. Create a comprehensive procurement report
-
-## 📁 Project Structure
-
-```
-crewai/
-├── main.py                 # Main application entry point
-├── agents.py              # Agent and task definitions
-├── crew.py                # Crew configuration
-├── tools.py               # Custom tools (legacy)
-├── schemas.py             # Pydantic data models
-├── requirements.txt       # Python dependencies
-├── README.md             # This file
-└── ai-agent-output/      # Generated reports and data
-    ├── step_1_suggested_search_queries.json
-    ├── step_2_search_results.json
-    ├── step_3_search_results.json
-    └── step_4_procurement_report.html
-```
 
 ## 🔧 Configuration
 
@@ -102,6 +106,7 @@ crewai/
 - Noon Egypt (`www.noon.com/egypt-en`)
 
 ### Customizable Parameters
+Edit the `inputs` dictionary in `src/research_crew/main.py`:
 ```python
 inputs = {
     "product_name": "coffee machine for the office",
@@ -143,47 +148,22 @@ The system generates:
 1. **Search Queries JSON**: AI-generated search terms
 2. **Search Results JSON**: Aggregated search results
 3. **Product Data JSON**: Detailed product information
-4. **HTML Report**: Professional procurement report with:
-   - Executive Summary
-   - Methodology
-   - Product Comparison Tables
-   - Price Analysis
-   - Recommendations
-
-## 🔍 Sample Output
-
-```json
-{
-  "products": [
-    {
-      "product_title": "De'Longhi Automatic Coffee Machine",
-      "product_current_price": 5999.00,
-      "product_original_price": 7999.00,
-      "product_discount_percentage": 25.0,
-      "agent_recommendation_rank": 5,
-      "product_specs": [
-        {"specification_name": "Pressure", "specification_value": "15 bar"},
-        {"specification_name": "Capacity", "specification_value": "1.8L"}
-      ]
-    }
-  ]
-}
-```
+4. **HTML Report**: Professional procurement report
 
 ## 🚧 Troubleshooting
 
 ### Common Issues
 
-1. **Unicode Encoding Error (Windows)**
+1. **LLM Provider Error**
+   - Make sure OpenRouter API key is valid
+   - Check internet connectivity
+
+2. **Import Errors**
+   - Ensure all dependencies are installed
+   - Run from the project root directory
+
+3. **Unicode Encoding Error (Windows)**
    - Run in PowerShell instead of Command Prompt
-   - Or use: `chcp 65001` before running
-
-2. **LiteLLM Import Error**
-   - Ensure all dependencies are installed: `pip install -r requirements.txt`
-
-3. **API Rate Limits**
-   - OpenRouter free tier has rate limits
-   - Tavily free tier: 1,000 searches/month
 
 ## 🤝 Contributing
 

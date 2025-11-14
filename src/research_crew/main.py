@@ -77,7 +77,7 @@ def run():
     
     # Define inputs for the crew
     inputs = {
-        "product_name": "coffee machine for the office",
+        "product_name": "smartphones",
         "websites_list": ["www.amazon.eg", "www.jumia.com.eg", "www.noon.com/egypt-en"],
         "country_name": "Egypt",
         "no_keywords": 10,

@@ -75,9 +75,3 @@ agentops.log
 # Temporary files
 *.tmp
 *.temp
-
-# Old structure files (if any remain)
-agents.py.bak
-tools.py.bak
-crew.py.bak
-main.py.bak
